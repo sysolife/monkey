@@ -47,6 +47,7 @@ public class UserController {
     @RequestMapping(value = "/addUser", method = RequestMethod.POST)
     private Map<String, Object> addUser(@RequestBody User area)
             throws JsonParseException, JsonMappingException, IOException {
+
         Map<String, Object> modelMap = new HashMap<String, Object>();
         // 添加区域信息
         modelMap.put("success", userService.addUser(area));
