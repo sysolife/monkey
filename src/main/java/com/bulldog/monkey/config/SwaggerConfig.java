@@ -60,7 +60,7 @@ public class SwaggerConfig {
                 // select()函数返回一个ApiSelectorBuilder实例
                 .select()
                 // 决定了暴露哪些接口给 Swagger，也可以 .paths(PathSelectors.any())
-                .paths(regex("/api/.*"))
+                .paths(regex("/api/v1/.*"))
                 .apis(RequestHandlerSelectors.basePackage("com.bulldog.monkey.api.controller"))
                 .build()
                 .globalOperationParameters(pars)

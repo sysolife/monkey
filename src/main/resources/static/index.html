@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+</head>
+<body>
+    <div style="width: 750px; height: 300px;">
+        <table style="width: 100%; text-align: center" border="2">
+            <thead>
+            <tr>
+                <td>电影ID</td>
+                <td>电影名称</td>
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+</body>
+<script type="text/javascript">
+    // JQ 页面加载完成后执行
+    $(function(){
+        loadData();
+    });
+
+    // 通过ajax从接口获取数据
+    function loadData() {
+        $.ajax({
+            url: 'http://107.150.124.179:8081/api/v1/movies',
+            type: 'get',
+            beforeSend: function (xhr) {
+                // 在所有发送请求的操作（open, send）之前执行
+                console.log('beforeSend', xhr)
+            },
+            success: function (res) {
+                // 隐藏 loading
+                // 只有请求成功（状态码为200）才会执行这个函数
+                console.log(res);
+                renderData(res);
+            },
+            error: function (xhr) {
+                // 隐藏 loading
+                // 只有请求不正常（状态码不为200）才会执行
+                console.log('error', xhr)
+            },
+            complete: function (xhr) {
+                // 不管是成功还是失败都是完成，都会执行这个 complete 函数
+                console.log('complete', xhr)
+            }
+        });
+
+        // 渲染数据，将接口返回的数据渲染到页面
+        function renderData(data) {
+            let tbodyString = '';
+            for (let i = 0; i < data.length; i++) {
+                let trString = '<tr>';
+                trString += tdGenerate(data[i].id);
+                trString += tdGenerate(data[i].title);
+                trString += '</tr>';
+                tbodyString += trString;
+            }
+            // $("tbody")：jq 选择器 返回一个JQ选择器对象
+            // html：jq api 改变JQ选择器对象（可以理解为一个html元素）HTML内容
+            $("tbody").html(tbodyString);
+        };
+
+        // 生成td字符串
+        function tdGenerate(value) {
+            return '<td>' + value + '</td>'
+        }
+    }
+</script>
+</html>
