@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.ParameterBuilder;
+import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ApiInfo;
@@ -21,10 +22,7 @@ import java.util.List;
 
 import static springfox.documentation.builders.PathSelectors.regex;
 
-/**
- * @author bulldog
- * @create 2019-07-13 19:00
- */
+
 //通过@Configuration注解，让Spring来加载该类配置
 @Configuration
 //通过@EnableSwagger2注解来启用Swagger2
@@ -32,6 +30,12 @@ import static springfox.documentation.builders.PathSelectors.regex;
 //@ConditionalOnExpression 为Spring的注解，用户是否实例化本类，用于是否启用Swagger的判断（生产环境需要屏蔽Swagger）
 @ConditionalOnExpression("${swagger.enable:true}")
 @Profile({"dev"})
+/**
+ * @ClassName SwaggerConfig
+ * @description Swagger配置文件
+ * @author lijian
+ * @date 2019/11/8
+ */
 public class SwaggerConfig {
 
     // select()函数返回一个ApiSelectorBuilder实例用来控制哪些接口暴露给Swagger来展现，本例采用指定扫描的包路径来定义，
@@ -52,7 +56,7 @@ public class SwaggerConfig {
         ParameterBuilder tokenPar = new ParameterBuilder();
         List<Parameter> pars = new ArrayList<Parameter>();
         tokenPar.name("token").description("令牌")
-                .modelRef(new ModelRef("string")).parameterType("query").required(false).build();
+                .modelRef(new ModelRef("string")).parameterType("header").required(false).build();
         pars.add(tokenPar.build());
 
         Docket docket = new Docket(DocumentationType.SWAGGER_2)
@@ -60,8 +64,8 @@ public class SwaggerConfig {
                 // select()函数返回一个ApiSelectorBuilder实例
                 .select()
                 // 决定了暴露哪些接口给 Swagger，也可以 .paths(PathSelectors.any())
-                .paths(regex("/api/v1/.*"))
                 .apis(RequestHandlerSelectors.basePackage("com.bulldog.monkey.api.controller"))
+                .paths(PathSelectors.any())
                 .build()
                 .globalOperationParameters(pars)
                 .useDefaultResponseMessages(false);

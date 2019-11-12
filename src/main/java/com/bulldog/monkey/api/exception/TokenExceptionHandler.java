@@ -1,4 +1,4 @@
-package com.bulldog.monkey.exception;
+package com.bulldog.monkey.api.exception;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

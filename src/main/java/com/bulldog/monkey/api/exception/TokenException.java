@@ -1,4 +1,4 @@
-package com.bulldog.monkey.exception;
+package com.bulldog.monkey.api.exception;
 
 
 public class TokenException extends RuntimeException {

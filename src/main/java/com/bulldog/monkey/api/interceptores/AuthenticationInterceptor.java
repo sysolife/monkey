@@ -1,16 +1,21 @@
-package com.bulldog.monkey.interceptores;
+package com.bulldog.monkey.api.interceptores;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.bulldog.monkey.annotations.PassToken;
 import com.bulldog.monkey.annotations.UserLoginToken;
-import com.bulldog.monkey.exception.TokenException;
+import com.bulldog.monkey.api.exception.TokenException;
+import com.bulldog.monkey.utils.JwtTokenUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
+import java.io.BufferedReader;
 import java.lang.reflect.Method;
 
 public class AuthenticationInterceptor implements HandlerInterceptor {
@@ -30,36 +35,16 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 return true;
             }
         }
-        String token = httpServletRequest.getHeader("token");// 从 http 请求头中取出 token
-        //检查有没有需要用户权限的注解
-        if (method.isAnnotationPresent(UserLoginToken.class)) {
-            UserLoginToken userLoginToken = method.getAnnotation(UserLoginToken.class);
-            if (userLoginToken.required()) {
-                // 执行认证
-                if (token == null) {
-                    throw new TokenException("无token，请先获取token");
-                }
-                // 获取 token 中的 user id
-                String userId = "1";
-                // try {
-                //     userId = JWT.decode(token).getAudience().get(0);
-                // } catch (JWTDecodeException j) {
-                //     throw new RuntimeException("401");
-                // }
-                // User user = userMapper.selectById(userId);
-                // User user = new User();
-                // if (user == null) {
-                //     throw new RuntimeException("用户不存在，请重新登录");
-                // }
-                // // 验证 token
-                // JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(user.getPassword())).build();
-                // try {
-                //     jwtVerifier.verify(token);
-                // } catch (JWTVerificationException e) {
-                //     throw new RuntimeException("401");
-                // }
-                return true;
-            }
+        // 从 http 请求头中取出 token
+        String token = httpServletRequest.getHeader("token");
+        // 执行认证
+        if (token == null) {
+            throw new TokenException("无token，请先获取token");
+        }
+        try {
+            Claims claims = JwtTokenUtil.decodeJWT(token);
+        } catch (Exception e) {
+            throw new TokenException(e.getMessage());
         }
         return true;
     }
@@ -78,7 +63,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     }
 
 
-    private void responseJson(HttpServletResponse httpServletResponse){
+    private void responseJson(HttpServletResponse httpServletResponse) {
         // httpServletResponse.setCharacterEncoding("UTF-8");
         // httpServletResponse.setContentType("application/json; charset=utf-8");
         // JSONObject res = new JSONObject();
@@ -89,5 +74,35 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         // out.write(res.toString());
         // out.flush();
         // out.close();
+    }
+
+
+    /**
+     * @param  httpServletRequest
+     * @return String
+     * @title 从请求中获取参数
+     * @description
+     * @author lijian
+     * @date 2019-11-08
+     */
+    private String getTokenStr(HttpServletRequest httpServletRequest) {
+        String token;
+        String method = httpServletRequest.getMethod();
+        if (method.equals(RequestMethod.GET)) {
+            token = httpServletRequest.getParameter("token");
+        } else {
+            try (BufferedReader reader = httpServletRequest.getReader()) {
+                StringBuilder sb = new StringBuilder();
+                String s;
+                while ((s = reader.readLine()) != null) {
+                    sb.append(s.trim());
+                }
+                JSONObject jsonObject = JSON.parseObject(sb.toString());
+                token = jsonObject.getString("token");
+            }catch (Exception e){
+                token = "";
+            }
+        }
+        return token;
     }
 }

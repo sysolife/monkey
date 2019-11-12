@@ -1,23 +1,14 @@
-package com.bulldog.monkey.dao;
+package com.bulldog.monkey.mapper;
 
-import com.bulldog.monkey.entities.User;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.bulldog.monkey.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 
-@Mapper
 @Component
-public interface UserMapper {
-
-    List<User> getAll();
-
-    User getOne(Long id);
-
-    void insert(User user);
-
-    void update(User user);
-
-    void delete(Long id);
-
+@Mapper
+public interface UserMapper extends BaseMapper<User> {
+    User selectByName(String name);
+    User getByName(String name);
 }

@@ -1,85 +1,99 @@
 package com.bulldog.monkey.api.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.bulldog.monkey.annotations.PassToken;
+import com.bulldog.monkey.annotations.UserLoginToken;
 import com.bulldog.monkey.api.model.UserEntity;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.springframework.boot.json.JacksonJsonParser;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
+import com.bulldog.monkey.api.model.UserEntityResult;
+import com.bulldog.monkey.entity.User;
+import com.bulldog.monkey.utils.JwtTokenUtil;
+import io.swagger.annotations.*;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.websocket.server.PathParam;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import com.bulldog.monkey.service.UserService;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * @author Michael
  * @create 2019-07-13 18:36
  */
 @RestController
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1/users")
 @Api(tags = {"用户相关接口"}, value = "用户模块")
 public class UserApiController {
 
-    // 模拟数据库
-    public static List<UserEntity> users = new ArrayList<>();
+    @Autowired
+    private UserService userService;
 
-    static {
-        UserEntity user1 = new UserEntity(1, "michael");
-        UserEntity user2 = new UserEntity(2, "qq");
-        users.add(user1);
-        users.add(user2);
-    }
-
-    @ApiOperation(value = "获取用户列表", notes = "获取全部用户信息")
-    @RequestMapping(value = "/users", method = RequestMethod.GET)
-    public List<UserEntity> getUsers() {
-        return users;
-    }
-
-    @ApiOperation(value = "查询单用户", notes = "根据用户id 查询其信息")
-    @ApiImplicitParam(name = "id", value = "用户id", paramType = "query", required = true)
-    @GetMapping("/user/{id}")
-    public UserEntity getUser(@PathParam("id") int id) {
-        UserEntity user = users.get(id);
-        return user;
-    }
-
-    @ApiOperation(value = "存储用户信息", notes = "存储用户详细信息")
-    @RequestMapping(value = "/user", method = RequestMethod.POST)
-    public UserEntity saveUser(@ApiParam(value = "用户信息", required = true)
-                               @RequestBody UserEntity user) {
-        users.add(user);
-        return user;
-    }
-
-    @ApiOperation(value = "删除用户", notes = "根据用户id删除用户信息")
+    @PassToken
+    @ApiOperation(value = "获取token", notes = "获取token")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "用户id", required = true, paramType = "path")
+            @ApiImplicitParam(name = "userName", value = "用户名", required = true, dataType = "string",example = "tom"),
+            @ApiImplicitParam(name = "password", value = "密码", required = true, dataType = "string",example = "123456")
     })
-    @RequestMapping(value = "/user/{id}", method = RequestMethod.DELETE)
-    public int deleteUser(@PathVariable("id") int id) {
-        users.remove(id);
-        return id;
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public HashMap<String, Object> login(String userName, String password) {
+        HashMap<String, Object> hashMap = loginCheck(userName, password);
+        if (Integer.parseInt(hashMap.get("code").toString()) == 0) {
+            return hashMap;
+        }
+        String token = JwtTokenUtil.createJWT(hashMap.get("userId").toString(), "monkey", "user_id", 10000*60);
+        hashMap.remove("userId");
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        data.put("token", token);
+        hashMap.put("data", data);
+        return hashMap;
     }
 
+    @UserLoginToken
+    @ApiOperation(value = "获取用户列表", notes = "获取全部用户信息")
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public List<UserEntity> getUsers() {
+        List<User> list = userService.list();
+        List<UserEntity> userEntityList = new ArrayList<UserEntity>();
+        for (User user: list) {
+            userEntityList.add(new UserEntity(user.getId(),user.getName()));
+        };
+        return userEntityList;
+    }
 
-    @ApiOperation(value = "更新用户信息", notes = "更新用户的个人信息")
-    @PutMapping("/user/")
-    public UserEntity updateUser(@RequestBody UserEntity user) {
-        int id = user.getId();
-        UserEntity oldUser = users.get(id);
-        users.set(id, user);
-        return user;
+    private HashMap<String, Object> loginCheck(String userName, String password) {
+        HashMap<String, Object> hashMap = new HashMap<String, Object>();
+        if (userName == null) {
+            hashMap.put("code", 0);
+            hashMap.put("message", "用户名为空!");
+            return hashMap;
+        }
+        if (password == null) {
+            hashMap.put("code", 0);
+            hashMap.put("message", "密码为空!");
+            return hashMap;
+        }
+        User user = userService.getByName(userName);
+        if (user == null) {
+            hashMap.put("code", 0);
+            hashMap.put("message", "用户不存在！");
+        } else {
+            if (!password.equals(user.getPassword())) {
+                hashMap.put("code", 0);
+                hashMap.put("message", "密码不正确！");
+            } else {
+                hashMap.put("code", 1);
+                hashMap.put("message", "获取token成功！");
+                hashMap.put("userId", user.getId().toString());
+            }
+        }
+        return hashMap;
     }
 }
 

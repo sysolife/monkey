@@ -5,6 +5,7 @@ import io.jsonwebtoken.*;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import java.security.Key;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import io.jsonwebtoken.Jwts;
@@ -17,7 +18,7 @@ public class JwtTokenUtil {
     public static String secretKey = "123456";
 
     //Sample method to construct a JWT
-    private String createJWT(String id, String issuer, String subject, long ttlMillis) {
+    public static String createJWT(String id, String issuer, String subject, long ttlMillis) {
 
         //The JWT signature algorithm we will be using to sign the token
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
@@ -48,7 +49,7 @@ public class JwtTokenUtil {
     }
 
     //Sample method to validate and read the JWT
-    private Claims parseJWT(String jwt) {
+    public static Claims decodeJWT(String jwt) {
 
         //This line will throw an exception if it is not a signed JWS (as expected)
         Claims claims = Jwts.parser()
@@ -57,7 +58,10 @@ public class JwtTokenUtil {
         System.out.println("ID: " + claims.getId());
         System.out.println("Subject: " + claims.getSubject());
         System.out.println("Issuer: " + claims.getIssuer());
-        System.out.println("Expiration: " + claims.getExpiration());
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy‐MM‐dd hh:mm:ss");
+        System.out.println("签发时间:"+sdf.format(claims.getIssuedAt()));
+        System.out.println("过期时间:"+sdf.format(claims.getExpiration()));
+        System.out.println("当前时间:"+sdf.format(new Date()) );
         return claims;
     }
 

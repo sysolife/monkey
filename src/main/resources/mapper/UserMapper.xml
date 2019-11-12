@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bulldog.monkey.mapper.UserMapper">
+
+    <!-- 映射表字段与实体类属性 -->
+    <resultMap id="BaseResultMap" type="com.bulldog.monkey.entity.User">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <id column="name" jdbcType="VARCHAR" property="name"/>
+        <id column="password" jdbcType="VARCHAR" property="password"/>
+        <id column="nick_name" jdbcType="VARCHAR" property="nickName"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+      id,name,password,nick_name
+    </sql>
+
+    <!-- 自定义查询方法 -->
+    <select id="selectByName" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from users where nick_name = '${name}'
+    </select>
+
+    <select id="getByName" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from users where name = '${name}'
+    </select>
+</mapper>
