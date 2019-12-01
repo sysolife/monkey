@@ -1,6 +1,7 @@
 package com.bulldog.monkey.api.controller;
 
 import com.bulldog.monkey.api.model.ArticleEntity;
+import com.bulldog.monkey.api.model.ArticleResultEntity;
 import com.bulldog.monkey.api.model.ResultEntity;
 import com.bulldog.monkey.entity.Article;
 import io.swagger.annotations.Api;
@@ -54,22 +55,29 @@ public class ArticleApiController {
             @ApiImplicitParam(name = "starStatus", value = "收藏状态", required = true, dataType = "int")
     })
     @RequestMapping(value = "/", method = RequestMethod.POST)
-    public ResultEntity saveArticle(String title,String content,int userId,int starStatus) {
+    public ArticleResultEntity saveArticle(String title,String content,int userId,int starStatus) {
         Article article = new Article();
         article.setTitle(title);
         article.setContent(content);
         article.setStar_status(starStatus);
         article.setUser_id(userId);
         int insert = articleMapper.insert(article);
-        ResultEntity resultEntity = new ResultEntity();
+        ArticleResultEntity articleResultEntity = new ArticleResultEntity();
         if (insert == 1) {
-            resultEntity.setCode(1);
-            resultEntity.setMsg("保存成功");
+            articleResultEntity.setCode(1);
+            articleResultEntity.setMsg("保存成功");
+            ArticleEntity articleEntity = new ArticleEntity();
+            articleEntity.setId(article.getId());
+            articleEntity.setTitle(content);
+            articleEntity.setUser_id(userId);
+            articleEntity.setContent(content);
+            articleEntity.setStar_status(starStatus);
+            articleResultEntity.setData(articleEntity);
         } else {
-            resultEntity.setCode(0);
-            resultEntity.setMsg("保存失败");
+            articleResultEntity.setCode(0);
+            articleResultEntity.setMsg("保存失败");
         }
-        return resultEntity;
+        return articleResultEntity;
     }
 
 

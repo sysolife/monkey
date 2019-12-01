@@ -39,6 +39,10 @@ public class ArticleEntity {
         this.star_status = star_status;
     }
 
+    public ArticleEntity(){
+
+    }
+
     public int getId() {
         return id;
     }
