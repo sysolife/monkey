@@ -50,7 +50,6 @@ public class JwtTokenUtil {
 
     //Sample method to validate and read the JWT
     public static Claims decodeJWT(String jwt) {
-
         //This line will throw an exception if it is not a signed JWS (as expected)
         Claims claims = Jwts.parser()
                 .setSigningKey(DatatypeConverter.parseBase64Binary(secretKey))
@@ -58,10 +57,10 @@ public class JwtTokenUtil {
         System.out.println("ID: " + claims.getId());
         System.out.println("Subject: " + claims.getSubject());
         System.out.println("Issuer: " + claims.getIssuer());
-        SimpleDateFormat sdf=new SimpleDateFormat("yyyy‐MM‐dd hh:mm:ss");
-        System.out.println("签发时间:"+sdf.format(claims.getIssuedAt()));
-        System.out.println("过期时间:"+sdf.format(claims.getExpiration()));
-        System.out.println("当前时间:"+sdf.format(new Date()) );
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy‐MM‐dd hh:mm:ss");
+        System.out.println("签发时间:" + sdf.format(claims.getIssuedAt()));
+        System.out.println("过期时间:" + sdf.format(claims.getExpiration()));
+        System.out.println("当前时间:" + sdf.format(new Date()) );
         return claims;
     }
 

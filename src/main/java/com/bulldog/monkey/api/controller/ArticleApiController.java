@@ -1,9 +1,11 @@
 package com.bulldog.monkey.api.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bulldog.monkey.api.model.ArticleEntity;
 import com.bulldog.monkey.api.model.ArticleResultEntity;
 import com.bulldog.monkey.api.model.ResultEntity;
 import com.bulldog.monkey.entity.Article;
+import com.bulldog.monkey.utils.JwtTokenUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -28,9 +30,12 @@ public class ArticleApiController {
 
     @ApiOperation(value = "获取笔记列表", notes = "获取全部笔记信息")
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public List<ArticleEntity> getArticles() {
+    public List<ArticleEntity> getArticles(@RequestHeader(name = "token") String token) {
         List<ArticleEntity> articleEntityList = new ArrayList<>();
-        List<Article> articleList = articleMapper.selectList(null);
+        QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
+        String userId = JwtTokenUtil.decodeJWT(token).getId();
+        queryWrapper.eq("user_id", Integer.parseInt(userId));
+        List<Article> articleList = articleMapper.selectList(queryWrapper);
         for (int i = 0; i < articleList.size(); i++) {
             Article article = articleList.get(i);
             ArticleEntity articleEntity = article.toEntity();
