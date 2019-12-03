@@ -1,6 +1,7 @@
 package com.bulldog.monkey.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.bulldog.monkey.api.model.ArticleEntity;
@@ -16,7 +17,9 @@ public class Article implements Serializable {
     private int id;
     private String title;
     private String content;
+    @TableField(value="user_id")
     private int user_id;
+    @TableField(value="star_status")
     private int star_status;
 
     public ArticleEntity toEntity(){

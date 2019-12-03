@@ -47,7 +47,7 @@ public class UserApiController {
         if (Integer.parseInt(hashMap.get("code").toString()) == 0) {
             return hashMap;
         }
-        String token = JwtTokenUtil.createJWT(hashMap.get("userId").toString(), "monkey", "user_id", 10000*60);
+        String token = JwtTokenUtil.createJWT(hashMap.get("userId").toString(), "monkey", "user_id", 100000*60);
         hashMap.remove("userId");
         HashMap<String, Object> data = new HashMap<String, Object>();
         data.put("token", token);
