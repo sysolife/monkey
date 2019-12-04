@@ -6,6 +6,7 @@ import com.bulldog.monkey.annotations.UserLoginToken;
 import com.bulldog.monkey.api.model.UserEntity;
 import com.bulldog.monkey.api.model.UserEntityResult;
 import com.bulldog.monkey.entity.User;
+import com.bulldog.monkey.mapper.UserMapper;
 import com.bulldog.monkey.utils.JwtTokenUtil;
 import io.swagger.annotations.*;
 
@@ -30,10 +31,23 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequestMapping("/api/v1/users")
 @Api(tags = {"用户相关接口"}, value = "用户模块")
-public class UserApiController {
+public class UserApiController extends BaseController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserMapper userMapper;
+
+    @PassToken
+    @ApiOperation(value = "注册", notes = "注册")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userName", value = "用户名", required = true, dataType = "string",example = "tom"),
+            @ApiImplicitParam(name = "password", value = "密码", required = true, dataType = "string",example = "123456")
+    })
+    @RequestMapping(value = "/signUp", method = RequestMethod.POST)
+    public HashMap<String, Object> signUp(String userName, String password) {
+        return signUpCheck(userName, password);
+    }
 
     @PassToken
     @ApiOperation(value = "获取token", notes = "获取token")
@@ -91,6 +105,38 @@ public class UserApiController {
                 hashMap.put("code", 1);
                 hashMap.put("message", "获取token成功！");
                 hashMap.put("userId", user.getId().toString());
+            }
+        }
+        return hashMap;
+    }
+
+    private HashMap<String, Object> signUpCheck(String userName, String password) {
+        HashMap<String, Object> hashMap = new HashMap<String, Object>();
+        if (userName == null) {
+            hashMap.put("code", 0);
+            hashMap.put("message", "用户名为空!");
+            return hashMap;
+        }
+        if (password == null) {
+            hashMap.put("code", 0);
+            hashMap.put("message", "密码为空!");
+            return hashMap;
+        }
+        User user = userService.getByName(userName);
+        if (user != null) {
+            hashMap.put("code", 0);
+            hashMap.put("message", "用户已存在！");
+        } else {
+            User signUpUser = new User();
+            signUpUser.setName(userName);
+            signUpUser.setPassword(password);
+            int insert = userMapper.insert(signUpUser);
+            if (insert != 1) {
+                hashMap.put("code", 0);
+                hashMap.put("message", "注册失败！");
+            } else {
+                hashMap.put("code", 1);
+                hashMap.put("message", "注册成功！");
             }
         }
         return hashMap;

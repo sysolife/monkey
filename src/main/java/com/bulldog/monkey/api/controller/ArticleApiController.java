@@ -23,7 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/articles")
 @Api(tags = {"笔记相关接口"}, value = "笔记模块")
-public class ArticleApiController {
+public class ArticleApiController extends BaseController {
 
     @Autowired
     public ArticleMapper articleMapper;
@@ -33,8 +33,7 @@ public class ArticleApiController {
     public List<ArticleEntity> getArticles(@RequestHeader(name = "token") String token) {
         List<ArticleEntity> articleEntityList = new ArrayList<>();
         QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
-        String userId = JwtTokenUtil.decodeJWT(token).getId();
-        queryWrapper.eq("user_id", Integer.parseInt(userId));
+        queryWrapper.eq("user_id", getCurrentUserId());
         List<Article> articleList = articleMapper.selectList(queryWrapper);
         for (int i = 0; i < articleList.size(); i++) {
             Article article = articleList.get(i);
