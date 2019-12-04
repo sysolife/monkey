@@ -51,20 +51,19 @@ public class ArticleApiController extends BaseController {
         return article.toEntity();
     }
 
-    @ApiOperation(value = "保存笔记", notes = "保存笔记")
+    @ApiOperation(value = "新增笔记", notes = "新增笔记")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "title", value = "标题", required = true, dataType = "string"),
             @ApiImplicitParam(name = "content", value = "内容", required = true, dataType = "string"),
-            @ApiImplicitParam(name = "userId", value = "用户ID", required = true, dataType = "int"),
             @ApiImplicitParam(name = "starStatus", value = "收藏状态", required = true, dataType = "int")
     })
     @RequestMapping(value = "/", method = RequestMethod.POST)
-    public ArticleResultEntity saveArticle(String title,String content,int userId,int starStatus) {
+    public ArticleResultEntity saveArticle(String title,String content,int starStatus) {
         Article article = new Article();
         article.setTitle(title);
         article.setContent(content);
         article.setStar_status(starStatus);
-        article.setUser_id(userId);
+        article.setUser_id(getCurrentUserId());
         int insert = articleMapper.insert(article);
         ArticleResultEntity articleResultEntity = new ArticleResultEntity();
         if (insert == 1) {
@@ -73,7 +72,7 @@ public class ArticleApiController extends BaseController {
             ArticleEntity articleEntity = new ArticleEntity();
             articleEntity.setId(article.getId());
             articleEntity.setTitle(content);
-            articleEntity.setUser_id(userId);
+            articleEntity.setUser_id(getCurrentUserId());
             articleEntity.setContent(content);
             articleEntity.setStar_status(starStatus);
             articleResultEntity.setData(articleEntity);
